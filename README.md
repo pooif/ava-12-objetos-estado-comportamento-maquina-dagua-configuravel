@@ -1,57 +1,134 @@
-# Template para projetos Java usando o Visual Studio Code
+# 1.2 // Objetos, Estado e Comportamento // Máquina D'água Configurável
 
-Um _template_ é um projeto base, para não iniciar do zero e ter pelo menos uma estrutura mínima onde se apoiar.
+Use este link do GitHub Classroom para ter sua cópia alterável deste repositório: <>
 
-Antes de começar a desenvolver com este _template_ é necessário ter instalado o Java Software Development Kit (JDK), o editor Visual Studio Code (VSCode) e o utilitário de controle de versão de código _Git_.
+Implementar respeitando os fundamentos de Orientação a Objetos.
+
+**Tópicos desta atividade:** abstrações, classes, objetos, construtores, validade, atributos, estado, comportamento, comandos e consultas, excepcionalidades e especificações.
+
+---
+
+A máquina d'água desta atividade é idêntica a apresentada na atividade [11](https://github.com/pooif/ava-11-objetos-estado-comportamento-maquina-dagua), porém: (1) permite configurar sua capacidade e (2) lança exceções para operações inválidas.
+
+```java
+MaquinaAguaConfiguravel maquinaCustom = new MaquinaAguaConfiguravel(10000, 30, 20);
+
+System.out.println(maquinaCustom.capacidadeAgua == 10000); // mL
+System.out.println(maquinaCustom.capacidadeCopos200 == 30);
+System.out.println(maquinaCustom.capacidadeCopos300 == 20);
+
+// As três linhas a seguinte não devem compilar pois estes atributos devem ser imutáveis:
+maquinaCustom.capacidadeAgua = 100000;
+maquinaCustom.capacidadeCopos200 = 300;
+maquinaCustom.capacidadeCopos300 = 200;
+
+// Checando armazenamento
+System.out.println(maquinaCustom.agua() == 0); // mL
+System.out.println(maquinaCustom.copos200() == 0);
+System.out.println(maquinaCustom.copos300() == 0);
+
+maquinaCustom.abastecerAgua();
+maquinaCustom.abastecerCopo200();
+maquinaCustom.abastecerCopo300();
+System.out.println(maquinaCustom.agua() == 10000);
+System.out.println(maquinaCustom.copos200() == 30);
+System.out.println(maquinaCustom.copos300() == 20);
+
+maquinaCustom.servirCopo200(); // -200
+maquinaCustom.servirCopo200(); // -200
+maquinaCustom.servirCopo200(); // -200
+maquinaCustom.servirCopo200(); // -200
+maquinaCustom.servirCopo200(); // -200
+
+// System.out.println(maq.agua() == 9000); // patch:
+System.out.println(maquinaCustom.copos200() == 25);
+System.out.println(maquinaCustom.agua() == 9000);
+
+MaquinaAguaConfiguravel maquininha = new MaquinaAguaConfiguravel(1000, 6, 3);
+
+System.out.println(maquininha.capacidadeAgua == 1000); // mL
+System.out.println(maquininha.capacidadeCopos200 == 6);
+System.out.println(maquininha.capacidadeCopos300 == 3);
+maquininha.abastecerAgua();
+maquininha.abastecerCopo200();
+maquininha.abastecerCopo300();
+System.out.println(maquininha.agua() == 1000);
+System.out.println(maquininha.copos200() == 6);
+System.out.println(maquininha.copos300() == 3);
+
+maquininha.servirCopo200(); // -200
+maquininha.servirCopo200(); // -200
+maquininha.servirCopo200(); // -200
+maquininha.servirCopo200(); // -200
+maquininha.servirCopo200(); // -200
+
+System.out.println(maquininha.agua() == 0);
+System.out.println(maquininha.copos200() == 1);
+System.out.println(maquininha.copos300() == 3);
+
+try {
+  maquininha.servirCopo200(); // deve lançar exceção
+  System.out.println(false); // esta linha não deve ser executada
+} catch (IllegalStateException e) {
+  System.err.println("true " + e.getMessage()); // Não há água
+}
+
+maquininha.abastecerAgua();
+System.out.println(maquininha.agua() == 1000);
+System.out.println(maquininha.copos200() == 1);
+System.out.println(maquininha.copos300() == 3);
+
+maquininha.servirCopo200(); // -200
+System.out.println(maquininha.agua() == 800);
+System.out.println(maquininha.copos200() == 0);
+
+try {
+  maquininha.servirCopo200(); // deve lançar exceção
+  System.out.println(false); // esta linha não deve ser executada
+} catch (IllegalStateException e) {
+  System.err.println("true " + e.getMessage()); // Não há copos de 200mL
+}
 
 
+// Máquinas inválidas devem lançar exceção
 
-## Instalação e Configuração do JDK
+try {
+  MaquinaAguaConfiguravel maqinvalida = new MaquinaAguaConfiguravel(1000, 0, 3);
+  System.out.println(false); // esta linha não deve ser executada
+} catch (IllegalArgumentException e) {
+  System.err.println("true " + e.getMessage()); // Copos de 200mL deve ser positivo
+}
 
-É necessário instalar o JDK a partir da versão 8, porém é recomendada versão 11-LTS (Long Term Support - suporte de longo prazo) ou até mesmo a 17-LTS.
+try {
+  MaquinaAguaConfiguravel maqinvalida = new MaquinaAguaConfiguravel(1000, 10, 0);
+  System.out.println(false); // esta linha não deve ser executada
+} catch (IllegalArgumentException e) {
+  System.err.println("true " + e.getMessage()); // Copos de 300mL deve ser positivo
+}
 
-Para o Sistema Operacional (SO) Windows, ele pode ser obtido aqui <https://adoptium.net/?variant=openjdk11&jvmVariant=hotspot>. Siga as instruções de instalação e não esqueça de selecionar os opcionais durante o processo, especialmente a parte ⚠️ _"add Java to PATH"_.
+try {
+  MaquinaAguaConfiguravel maqinvalida = new MaquinaAguaConfiguravel(-1000, 10, 10);
+  System.out.println(false); // esta linha não deve ser executada
+} catch (IllegalArgumentException e) {
+  System.err.println("true " + e.getMessage()); // Quantidade água deve ser positivo
+}
 
-Para Sistemas Operacionais Linux/Debian, como Ubuntu, Pop OS, Mint, Elementary, etc, execute no terminal o comando `sudo apt install openjdk-11-jdk`, que a mágica vai acontecer.
+// Máquina de 500 litros!
+MaquinaAguaConfiguravel maquinao = new MaquinaAguaConfiguravel(500000, 3000, 2000);
+maquinao.abastecerAgua();
+maquinao.abastecerCopo300();
 
-Para testar a instalação, seja no Windows ou Linux, abra o _Prompt_ de Comando (cmd) ou o Terminal e execute o compilador Java com `javac -version`. A saída deve ser algo com `javac 11.0.9.1`, ou outra versão.
+// Esvaziando a máquina
+try { // servindo enquanto houver água até causa estado inválido
+  while (true) maquinao.servirCopo300();
+} catch (IllegalStateException e) {
+  System.err.println("Não há água suficiente " + maquinao.agua());
+}
 
-
-
-## Instalação e Configuração do Visual Studio Code (VSCode)
-
-O VSCode pode ser obtido aqui: <https://code.visualstudio.com/download>. A instalação é semelhante nos Sistemas Operacionais Windows e Linux.
-
-No Windows, abra o instalador e não esqueça de selecionar todos os opcionais, como _adicionar code ao path_ e _adicionar "abrir com code" ao menu_, por exemplo.
-
-No Linux, abra o arquivo `.deb` baixado no gerenciador de pacotes e instale normalmente conforme instruções de seu sistema operacional.
-
-Este _template_ possui uma pasta [.vscode](.vscode) com as extensões necessárias em [extensions.json](.vscode/extensions.json) e as configurações recomendadas em [settings.json](.vscode/settings.json) para um **ambiente de ensino** (configuração didática). Fique a vontade para alterá-los como achar melhor.
-
-A única extensão obrigatória é a _"vscjava.vscode-java-pack"_.
-
-A extensão _"EditorConfig"_ é bastante recomendada. Ela funciona junto com o arquivo [.editorconfig](.editorconfig) presente neste _template_ para padronizar a formatação dos códigos-fonte.
-
-Finalmente, se preferes o editor em Português, instale a extensão _Portuguese (Brazil) Language Pack for Visual Studio Code_.
-
-
-
-## Instalação e Configuração do Git
-
-O Git para Windows pode ser obtido neste link: <https://git-scm.com/download/win>. A instalação é simples e intuitiva. Como sempre, não esqueça dos opcionais, principalmente a opção _adicionar o git ao path_!
-
-Para Linux, o comando `sudo apt install git` no terminal faz tudo.
-
-Para verificar a instalação abra o _prompt_ ou um terminal e execute `git --version`. Se não acusou _"comando não encontrado"_ é porque está tudo funcionando perfeitamente.
-
-
-
-## Códigos-fonte
-
-Considere adicionar os arquivos de código-fonte `.java` no diretório [src](./src/), como o exemplo [src/App.java](./src/App.java).
+System.out.println(maquinao.agua() == 200);
+System.out.println(maquinao.copos300() == 334);
+```
 
 
-
-## Licenciamento
-
-Este _template_ é _open source_ licenciado sob a GPL, assim como todos os projetos derivados dele. Mais detalhes em [LICENÇA.md](LICENÇA.md).
+---
+Obs.: os casos de teste não podem ser alterados, mas outros podem ser adicionados. Fique a vontade para adicionar códigos que imprimem ou separam os testes, por exemplo.
